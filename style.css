@@ -1,0 +1,596 @@
+body {
+  font-family: Arial, sans-serif;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center; /* İçeriği dikeyde ortalar */
+  min-height: 100vh; /* Sayfanın tamamını kaplamasını sağlar */
+  margin: 0; /* Varsayılan marginleri sıfırlar */
+  padding: 0; /* Varsayılan paddingleri sıfırlar */
+  overflow-x: hidden; /* Yatay kaydırmayı engeller */
+  background: linear-gradient(
+    to bottom,
+    #007bff,
+    #0056b3
+  ); /* Daha yumuşak bir deniz mavisi geçişi */
+  color: #ffffff; /* Metin rengini beyaza çevirerek kontrastı artır */
+}
+h1 {
+  /* Genel h1, intro ekranındaki ana başlık */
+  color: #84ff00; /* Ateşli kırmızı */
+  margin-bottom: 50px;
+  font-size: 4.5em; /* Daha da büyütelim! */
+  text-shadow: 0 0 15px rgba(8, 28, 255, 0.947),
+    /* Daha yumuşak bir dış parlama */ 0 0 30px rgb(255, 4, 4); /* İkinci, daha geniş parlama */
+  letter-spacing: 5px; /* Harfler arasına boşluk ekle */
+  animation: pulse 2s infinite alternate; /* Hafif bir nabız efekti */
+}
+
+h1.title {
+  /* Seçim ekranındaki "YOU" ve "ENEMY" başlıkları */
+  margin-top: 35px; /* Üstten biraz daha boşluk */
+  margin-bottom: 15px; /* Alttan boşluk */
+  font-size: 2.5em; /* Biraz daha büyük yapalım */
+  color: #b1f5f3; /* Daha parlak, deniz mavisi bir ton */
+  text-transform: uppercase; /* Tüm harfleri büyüt */
+  letter-spacing: 2px; /* Harfler arasına boşluk */
+  text-shadow: 1px 1px 3px #fc0808; /* Hafif bir gölge */
+  border-bottom: 2px solid #f90a0a; /* Altına ince bir çizgi */
+  padding-bottom: 5px; /* Çizgi ile yazı arasına boşluk */
+}
+/* Ana başlık için animasyon */
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    text-shadow: 0 0 15px rgba(8, 28, 255, 0.947);
+  }
+  100% {
+    transform: scale(1.03); /* Hafifçe büyür */
+    text-shadow: 0 0 25px rgb(255, 8, 8), 0 0 40px rgba(33, 8, 255, 0.7); /* Gölge daha da belirginleşir */
+  }
+}
+
+p.subtitle {
+  font-size: 1.3em; /* Biraz daha büyütelim, daha belirgin olsun */
+  margin-bottom: 20px; /* Alttan boşluğu artırarak daha fazla nefes aldır */
+  color: #f70000; /* Daha sıcak, altın sarısı veya turuncu-kırmızı tonu deneyelim, ateş temasına yakın */
+  font-weight: 500; /* Hafif kalınlık verelim */
+  text-shadow: 1px 1px 2px rgb(3, 15, 246); /* Hafif bir gölge ile okunabilirliği artır */
+  /* Opsiyonel: Hafif bir animasyon ekleyebiliriz */
+  /* animation: fadeIn 1s ease-out; */
+}
+
+.game-subtitle {
+  /* "Pacific" için */
+  font-size: 2.5em; /* Daha da büyütelim, ana başlıkla orantılı olsun */
+  /* color: #ff0000; */ /* Kırmızı yerine farklı bir renk deneyelim */
+  color: #ff0000; /* Parlak bir altın rengi, deniz ve hazine temasına uygun */
+  margin-bottom: 40px; /* Alt boşluğu artırarak ana başlıktan ayrımını belirginleştir */
+  font-weight: bold;
+  text-transform: uppercase;
+  letter-spacing: 4px; /* Harfler arasına daha fazla boşluk */
+  text-shadow: 0 0 10px rgba(232, 250, 75, 0.997),
+    /* Altın rengine uygun parlama efekti */ 0 0 20px rgba(255, 215, 0, 0.5);
+  animation: floatUpDown 2s infinite ease-in-out alternate; /* Yavaşça yukarı aşağı dalgalanma */
+}
+
+/* "Pacific" için animasyon */
+@keyframes floatUpDown {
+  0% {
+    transform: translateY(0px); /* Başlangıçta biraz aşağıda */
+  }
+  50% {
+    transform: translateY(-5px); /* Hafifçe yukarı kayar */
+  }
+  100% {
+    transform: translateY(px); /* Sonra tekrar aşağı kayar */
+  }
+}
+/* Screen Management */
+.screen {
+  display: none; /* Tüm ekranlar varsayılan olarak gizli */
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 900px;
+  padding: 20px;
+  box-sizing: border-box;
+  opacity: 0; /* Başlangıçta opaklık 0 (tamamen şeffaf) */
+  transition: opacity 0.5s ease-in-out; /* Opaklık değişimine 0.5 saniyelik bir geçiş ekle */
+  position: absolute; /* Ekranların üst üste binmesini sağlar */
+  top: 50%; /* Dikeyde ortalama için */
+  left: 50%; /* Yatayda ortalama için */
+  transform: translate(-50%, -50%); /* Kendi boyutuna göre ortalama */
+  z-index: 1; /* Varsayılan z-index */
+  /* Diğer arka plan, kenarlık vb. stilleri her ekrana özel olarak tanımlamayı unutmayın */
+}
+
+.screen.active {
+  display: flex; /* Aktif ekranı göster */
+  opacity: 1; /* Aktif olduğunda opaklık 1 (tamamen görünür) */
+  z-index: 2; /* Aktif ekranın diğerlerinin üzerinde olmasını sağlar */
+}
+
+.screen.hidden {
+  display: none; /* Gizli ekranlar tamamen kapalı */
+}
+/* Intro Screen Specifics */
+#intro-screen {
+  justify-content: center;
+  /* height: 60vh; */ /* Artık justify-content ile otomatik ayarlanıyor, ancak sabit bir yükseklik isterseniz kalsın */
+  background: linear-gradient(
+    135deg,
+    #007bff 0%,
+    #00bcd4 100%
+  ); /* Deniz temasına uygun, canlı bir gradyan */
+  border-radius: 15px; /* Daha yumuşak köşeler */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4),
+    /* Daha belirgin ve derin bir gölge */ 0 0 0 5px rgba(122, 237, 7, 0.5); /* Yeşil kenarlık gölgesini dış parlama olarak kullan */
+  padding: 50px; /* İçeriğe daha fazla boşluk */
+  color: white; /* Metin rengini beyaz yapın, gradyan üzerinde daha iyi durur */
+  text-align: center; /* İçerik merkezde olsun */
+}
+
+#intro-start-button {
+  padding: 18px 50px; /* Butonu daha büyük yap */
+  font-size: 2.2em; /* Yazıyı büyüt */
+  background: linear-gradient(
+    45deg,
+    #090cce 0%,
+    #178bff 100%
+  ); /* Mavi tonlarında bir gradyan */
+  color: white;
+  border: none;
+  border-radius: 50px; /* Daha yumuşak köşeler */
+  cursor: pointer;
+  transition: all 0.3s ease; /* Tüm değişikliklere daha akıcı bir geçiş */
+  box-shadow: 10 5px 15px rgb(0, 0, 0); /* Butona hafif gölge */
+  text-transform: uppercase; /* Yazıyı büyük harf yap */
+  font-weight: bold; /* Kalın yap */
+  letter-spacing: 1px; /* Harfler arasına boşluk */
+}
+
+#intro-start-button:hover {
+  background: linear-gradient(
+    45deg,
+    #0cf010 0%,
+    #ff6f00 100%
+  ); /* Hover'da turuncu/altın gradyanı */
+  transform: translateY(-5px) scale(1.05); /* Yukarı zıpla ve hafifçe büyü */
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5); /* Hover'da daha belirgin gölge */
+}
+/* Country Selection Screen Specifics */
+#country-selection-screen {
+  border: 5px solid #0056b3; /* Daha belirgin ve temaya uygun bir kenarlık */
+  border-radius: 15px; /* Yumuşak köşeler */
+  background-color: rgb(255, 255, 255); /* Hafif şeffaf beyaz arka plan */
+  box-shadow: 0 8px 16px rgba(237, 11, 11, 0.992); /* Daha derin ve zarif bir gölge */
+  margin-top: 50px; /* Ortalamayı daha iyi kontrol etmek için */
+  padding: 35px; /* İç boşluğu artır */
+  backdrop-filter: blur(
+    5px
+  ); /* Hafif bulanık arka plan efekti (modern tarayıcılarda) */
+  /* Diğer ekranlarla uyumlu hale getirmek için max-width zaten ayarlı */
+}
+.flag-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 15px; /* Bayraklar arasında boşluğu artırarak daha ferah bir görünüm */
+  margin-bottom: 25px; /* Alttan boşluğu artır */
+  padding: 20px; /* İç boşluğu artır */
+  /* Mevcut kenarlık ve arka plan yerine daha şık bir yaklaşım */
+  border: 2px solid #0056b3; /* Koyu mavi, oyun temasına uygun kenarlık */
+  border-radius: 12px; /* Daha yumuşak köşeler */
+  background: rgba(
+    255,
+    255,
+    255,
+    0.1
+  ); /* Çok hafif şeffaf arka plan, ana arka planı göstermek için */
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.2); /* İçeri doğru hafif bir gölge efekti */
+  min-height: 120px; /* Yüksekliği biraz artır */
+}
+
+.flag {
+  width: 90px; /* Bayrakları biraz büyütelim */
+  height: 60px; /* Orantılı olarak yüksekliği de büyüt */
+  border: 3px solid transparent; /* Kalınlaştırılmış ama hala şeffaf kenarlık */
+  cursor: pointer;
+  transition: all 0.3s ease; /* Geçiş süresini uzatarak daha yumuşak bir animasyon */
+  position: relative;
+  overflow: hidden; /* Kenarlık dışına taşmayı engeller */
+  border-radius: 4px; /* Hafif yuvarlatılmış köşeler */
+}
+
+.flag img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  border: none; /* Artık dış .flag üzerinde kenarlık olduğu için burada gerek yok */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Bayraklara hafif bir gölge */
+}
+
+.flag:hover {
+  transform: scale(1.1); /* Hover'da daha fazla büyüme */
+  border-color: #ffd700; /* Hover rengini altın sarısı yapalım (ana başlıktaki Pacific rengiyle uyumlu) */
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.7); /* Altın renginde parlama */
+}
+
+.flag.selected {
+  border-color: #28a745; /* Seçili bayrak için canlı bir yeşil (devam butonuna uygun) */
+  box-shadow: 0 0 15px rgba(40, 167, 69, 0.8),
+    /* Yeşil renkte daha belirgin bir parlama */ 0 0 0 4px #28a745; /* Dışarıda da yeşil bir çerçeve */
+  transform: scale(1.1); /* Seçili olduğunda da aynı büyüklükte kalsın */
+}
+.selection-status {
+  font-size: 1.2em; /* Biraz daha büyütelim */
+  font-weight: bold;
+  margin-top: -5px; /* Üstten boşluğu ayarla */
+  margin-bottom: 25px; /* Alttan boşluğu artır */
+  color: #34495e; /* Daha koyu, okunabilir bir gri tonu */
+  text-shadow: 1px 1px 1px rgba(255, 255, 255, 0.1); /* Hafif beyaz gölge ile kontrastı artır */
+}
+#continue-game-button {
+  padding: 15px 35px; /* Butonu biraz daha büyük yap */
+  font-size: 1.2em; /* Yazıyı büyüt */
+  font-weight: bold; /* Yazıyı kalın yap */
+  background: linear-gradient(
+    45deg,
+    #c1b514,
+    #39d40aa8
+  ); /* Yeşil tonlarında gradyan */
+  color: rgb(255, 255, 255);
+  border: none;
+  border-radius: 8px; /* Köşeleri yuvarla */
+  cursor: pointer;
+  transition: all 0.3s ease-in-out; /* Daha yumuşak geçişler */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Butona hafif bir gölge */
+  text-transform: uppercase; /* Yazıyı büyük harf yap */
+  letter-spacing: 1px; /* Harfler arasına boşluk */
+}
+
+#continue-game-button:hover {
+  background: linear-gradient(
+    45deg,
+    #213088,
+    #5100ff
+  ); /* Hover'da daha koyu yeşil gradyan */
+  transform: translateY(-3px) scale(1.02); /* Yukarı zıpla ve hafifçe büyü */
+  box-shadow: 0 6px 12px rgba(255, 255, 255, 0.3); /* Hover'da gölgeyi artır */
+}
+
+#continue-game-button:disabled {
+  background: #cccccc; /* Pasifken gri renk */
+  cursor: not-allowed;
+  box-shadow: none; /* Gölgeyi kaldır */
+  transform: none; /* Transform efektini kaldır */
+  opacity: 0.7; /* Hafif şeffaflık */
+}
+.flag-icon {
+  width: 50px;
+  height: 35px;
+  margin-left: 10px;
+  vertical-align: middle;
+  border: 1px solid #ccc;
+}
+
+/* Game Screen Specifics */
+.game-container {
+  display: flex;
+  justify-content: center; /* Panoları yatayda ortala */
+  gap: 50px; /* Panolar arasındaki boşluğu artır, daha ferah durur */
+  margin-top: 40px; /* Üst boşluğu artır */
+  padding: 20px; /* İç boşluk ekle */
+  background: rgba(
+    255,
+    255,
+    255,
+    0.08
+  ); /* Hafif şeffaf, koyu arka planın üzerine hafifçe görünen bir katman */
+  border-radius: 15px; /* Yumuşak köşeler */
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4); /* Derin bir gölge ile öne çıkar */
+  backdrop-filter: blur(
+    3px
+  ); /* Hafif bir bulanıklık efekti (modern tarayıcılarda) */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Hafif şeffaf bir kenarlık */
+}
+
+.player-board-container,
+.computer-board-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background-color: rgba(255, 255, 255, 0.05); /* Çok hafif şeffaf arka plan */
+  padding: 15px; /* İç boşluk */
+  border-radius: 10px; /* Köşeleri yuvarla */
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3); /* Hafif bir gölge */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* İnce, şeffaf kenarlık */
+}
+
+.player-board-container h2,
+.computer-board-container h2 {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Başlık ve bayrak ikonu arasına boşluk */
+  margin-bottom: 15px; /* Alttan boşluğu artır */
+  color: #e0f2f7; /* Açık mavi/beyaz tonu, koyu arka plan üzerinde iyi durur */
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.5); /* Okunabilirliği artıran hafif gölge */
+  font-size: 1.8em; /* Başlık boyutunu artır */
+}
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(10, 35px);
+  grid-template-rows: repeat(10, 35px);
+  border: 3px solid #0056b3; /* Kalın, koyu mavi kenarlık, deniz temasına uygun */
+  width: 350px;
+  height: 350px;
+  background-color: rgba(
+    0,
+    123,
+    255,
+    0.3
+  ); /* Hafif şeffaf, deniz mavisi bir arka plan */
+  box-shadow: inset 0 0 15px rgba(0, 0, 0, 0.5); /* İçeri doğru derin bir gölge */
+  border-radius: 5px; /* Hafif yuvarlatılmış köşeler */
+  overflow: hidden; /* Hücrelerin kenarlığın dışına taşmasını engellemek için */
+}
+
+.cell {
+  width: 35px;
+  height: 35px;
+  border: 1px solid rgba(0, 0, 0, 0.1); /* Daha yumuşak, hafif bir hücre kenarlığı */
+  box-sizing: border-box;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  background-color: rgba(
+    0,
+    150,
+    255,
+    0.1
+  ); /* Hücreler için çok hafif şeffaf mavi */
+  transition: background-color 0.2s ease, border-color 0.2s ease; /* Fare üzerine gelme ve tıklama için geçiş */
+}
+
+.cell:hover {
+  background-color: rgba(
+    0,
+    180,
+    255,
+    0.3
+  ); /* Hover'da daha belirgin bir mavi */
+  border-color: rgba(255, 255, 255, 0.5); /* Hover'da daha parlak kenarlık */
+}
+
+/* In-game states */
+.cell.hit {
+  background-color: #e74c3c; /* Daha derin, mat bir kırmızı */
+  box-shadow: inset 0 0 10px rgba(255, 0, 0, 0.7); /* İçeri doğru kırmızı bir parlama */
+  animation: hit-animation 0.4s ease-out; /* Kısa bir isabet animasyonu */
+  position: relative; /* İçerik için pozisyon referansı */
+}
+
+/* Isabet animasyonu (patlama hissi) */
+@keyframes hit-animation {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.cell.hit::after {
+  content: "🔥"; /* Ateş emojisi ekle */
+  position: absolute;
+  font-size: 1.5em;
+  line-height: 1;
+  pointer-events: none; /* Emoji, tıklama olaylarını engellemesin */
+}
+
+.cell.miss {
+  background-color: #3498db; /* Daha canlı, okyanus mavisi */
+  box-shadow: inset 0 0 8px rgba(0, 0, 255, 0.3); /* İçeri doğru mavi bir parlama */
+  animation: miss-animation 0.3s ease-out; /* Kısa bir ıskalama animasyonu */
+  position: relative; /* İçerik için pozisyon referansı */
+}
+
+/* Iskama animasyonu (su sıçraması hissi) */
+@keyframes miss-animation {
+  0% {
+    transform: scale(0.8);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.cell.miss::after {
+  content: "💧"; /* Su damlası emojisi ekle */
+  position: absolute;
+  font-size: 1.5em;
+  line-height: 1;
+  pointer-events: none;
+}
+💧 .cell.sunk {
+  background-color: #2c3e50; /* Koyu, metalik gri/mavi tonu (batmış gemi rengi) */
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.8); /* Çok derin, siyah bir gölge */
+  border-color: #1a242f; /* Kenarlığı daha da koyu yap */
+  animation: sunk-animation 0.8s forwards; /* Daha uzun bir batık animasyonu */
+  position: relative;
+}
+
+/* Batık animasyonu (derinlere batma hissi) */
+@keyframes sunk-animation {
+  0% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    background-color: #c0392b; /* Batmadan önce kısa bir kırmızı parıltı */
+  }
+  50% {
+    background-color: #2c3e50;
+    transform: translateY(5px) scale(0.95); /* Hafifçe içeri doğru batar */
+    opacity: 0.8;
+  }
+  100% {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+    background-color: #2c3e50;
+  }
+}
+
+.cell.sunk::after {
+  content: "💀"; /* Kurukafa emojisi veya farklı bir ikon */
+  position: absolute;
+  font-size: 1.5em;
+  line-height: 1;
+  pointer-events: none;
+  text-shadow: 0 0 5px black;
+}
+
+/* Ship placement visuals */
+.cell.ship-placement-active {
+  background-color: rgba(
+    60,
+    179,
+    113,
+    0.7
+  ); /* Canlı, yarı saydam bir deniz yeşili */
+  border: 1px dashed #3cb371; /* Yeşille uyumlu kesikli kenarlık */
+  box-shadow: 0 0 8px rgba(60, 179, 113, 0.8); /* Hücre etrafında yeşil bir parlama */
+}
+
+.cell.occupied,
+.cell.player-ship {
+  background-color: #34495e; /* Koyu, metalik bir gri-mavi (gemi rengi) */
+  border: 1px solid #2c3e50; /* Koyu gri bir kenarlık */
+  box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.5); /* İçeri doğru gölge ile derinlik */
+  transition: background-color 0.3s ease; /* Yerleştirme sırasında yumuşak geçiş */
+}
+
+.cell.invalid-placement {
+  background-color: rgba(231, 76, 60, 0.7); /* Yarı saydam, uyarıcı kırmızı */
+  border: 1px dashed #c0392b; /* Kırmızıyla uyumlu kesikli kenarlık */
+  box-shadow: 0 0 8px rgba(231, 76, 60, 0.8); /* Hücre etrafında kırmızı bir parlama */
+  animation: shake 0.3s ease-in-out 2; /* Hızlı bir sallanma animasyonu */
+}
+
+/* Geçersiz yerleşim için sallanma animasyonu */
+@keyframes shake {
+  0% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-3px);
+  }
+  50% {
+    transform: translateX(3px);
+  }
+  75% {
+    transform: translateX(-3px);
+  }
+  100% {
+    transform: translateX(0);
+  }
+}
+
+.ship-placement-controls {
+  margin-top: 25px; /* Üst boşluğu artır */
+  text-align: center;
+  padding: 15px; /* İç boşluk ekle */
+  background: rgba(255, 255, 255, 0.05); /* Hafif şeffaf bir arka plan */
+  border-radius: 10px; /* Yuvarlatılmış köşeler */
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Hafif bir gölge */
+}
+button {
+  padding: 12px 25px; /* Daha fazla dolgu ile butonu büyüt */
+  font-size: 1.1em; /* Yazı boyutunu artır */
+  font-weight: bold; /* Yazıyı kalın yap */
+  cursor: pointer;
+  margin: 8px; /* Margin'i artırarak butonlar arası boşluğu iyileştir */
+  background: linear-gradient(
+    45deg,
+    #007bff 0%,
+    #0056b3 100%
+  ); /* Mavi tonlarında gradyan */
+  color: white;
+  border: none;
+  border-radius: 8px; /* Daha yuvarlak köşeler */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Hafif bir gölge */
+  transition: all 0.3s ease; /* Tüm özelliklere daha akıcı geçiş */
+  text-transform: uppercase; /* Metni büyük harf yap */
+  letter-spacing: 0.5px; /* Hafif harf aralığı */
+}
+
+button:hover {
+  background: linear-gradient(
+    45deg,
+    #0056b3 0%,
+    #003f80 100%
+  ); /* Hover'da daha koyu gradyan */
+  transform: translateY(-2px); /* Hafifçe yukarı zıplama efekti */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3); /* Hover'da gölgeyi artır */
+}
+
+button:active {
+  transform: translateY(0); /* Tıklandığında geri itme efekti */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2); /* Daha küçük gölge */
+  background: #003f80; /* Tıklandığında düz en koyu renk */
+}
+
+button:disabled {
+  background: #a9a9a9; /* Pasifken mat, daha estetik bir gri */
+  color: #f0f0f0; /* Gri arka plan üzerinde okunur beyaz */
+  cursor: not-allowed;
+  box-shadow: none; /* Gölgeyi kaldır */
+  transform: none; /* Transform efektini kaldır */
+  opacity: 0.6; /* Hafif şeffaflık */
+}
+
+.message-area {
+  margin-top: 30px; /* Üst boşluğu artırarak daha fazla nefes aldır */
+  padding: 15px 20px; /* İç dolguyu artır */
+  font-size: 1.3em; /* Yazı boyutunu büyüt, daha okunaklı olsun */
+  font-weight: bold;
+  color: #ecf0f1; /* Açık, okunabilir bir gri tonu (arka plan ile kontrast için) */
+  text-align: center;
+  background: rgba(0, 0, 0, 0.4); /* Yarı saydam koyu bir arka plan */
+  border-radius: 10px; /* Köşeleri yuvarla */
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5); /* Derin bir gölge ile öne çıkar */
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.7); /* Metne derinlik kat */
+  border: 1px solid rgba(255, 255, 255, 0.2); /* Hafif şeffaf bir kenarlık */
+  backdrop-filter: blur(
+    2px
+  ); /* Hafif bulanıklık efekti (modern tarayıcılarda) */
+  min-width: 300px; /* Minimum genişlik belirle */
+  max-width: 600px; /* Maksimum genişlik belirle */
+  opacity: 0; /* Başlangıçta gizle */
+  animation: fadeInMessage 0.5s ease-out forwards; /* Mesajın içeri girmesi için animasyon */
+}
+
+.game-message-area {
+  min-height: 60px; /* Daha uzun mesajlar için yüksekliği artır */
+  display: flex; /* İçeriği dikey ve yatayda ortalamak için flex kullan */
+  align-items: center;
+  justify-content: center;
+}
+
+/* Mesajın belirginleşme animasyonu */
+@keyframes fadeInMessage {
+  0% {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
