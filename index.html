@@ -1,19 +1,20 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Battleship</title>
+    <title>Battleship Pacific</title>
     <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <!--- Intro Screen --->
+    <!-- Intro Screen -->
     <div id="intro-screen" class="screen active">
       <h1>Battleship</h1>
       <p class="game-subtitle">Pacific</p>
       <button id="intro-start-button">Start</button>
     </div>
-    <!--- Country Selection Screen --->
+
+    <!-- Country Selection Screen -->
     <div id="country-selection-screen" class="screen hidden">
       <h1 class="title">YOU</h1>
       <p class="subtitle">Choose your country!</p>
@@ -32,27 +33,22 @@
       <button id="continue-game-button" disabled>Continue to Game</button>
       <p id="country-selection-message" class="message-area"></p>
     </div>
-    <!--- Game Screen --->
+
+    <!-- Game Screen -->
     <div id="game-screen" class="screen hidden">
       <div class="game-container">
         <div class="player-board-container">
           <h2 id="player-title">Your Board</h2>
-          <img id="player-flag" class="flag-icon" src="" alt="Player Flag" />
           <div id="player-board" class="board"></div>
+
           <div class="ship-placement-controls">
-            <button id="rotate-ship">Rotate Ship (Horizontal/Vertical)</button>
-            <button id="start-game-button" disabled>Start Game</button>
+            <button id="rotate-ship">Rotate Ship</button>
+            <button id="start-game-button" disabled>Start Battle</button>
           </div>
         </div>
 
         <div class="computer-board-container">
           <h2 id="computer-title">Opponent's Board</h2>
-          <img
-            id="computer-flag"
-            class="flag-icon"
-            src=""
-            alt="Computer Flag"
-          />
           <div id="computer-board" class="board"></div>
         </div>
       </div>
@@ -61,6 +57,17 @@
         <p id="message"></p>
       </div>
     </div>
+
+    <!-- Background Music -->
+    <audio id="bg-music" loop>
+      <source src="glorious-morning.mp3" type="audio/mpeg" />
+    </audio>
+
+    <audio id="bg-music" loop>
+      <source src="glorious-morning.mp3" type="audio/mpeg" />
+    </audio>
+
+    <button id="music-toggle-button">Pause Music</button>
 
     <script src="script.js"></script>
   </body>
