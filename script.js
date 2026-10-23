@@ -1,24 +1,23 @@
-document.addEventListener("DOMContentLoaded", () => {
-  /* In dit deel maken we verwijzingen aan in JavaScript om belangrijke elementen met een id in HTML te bereiken.*/
+document.addEventListener("DOMContentLoaded", () => { // Voer de JavaScript-code uit nadat de HTML volledig is geladen.
+ /*######## Het selecteren van DOM-elementen ############### */
   const introScreen = document.getElementById("intro-screen");
   const introStartButton = document.getElementById("intro-start-button");
-  // --- DOM Elements ---
   const countrySelectionScreen = document.getElementById(
-    "country-selection-screen"
+    "country-selection-screen",
   );
   const gameScreen = document.getElementById("game-screen");
 
   const playerFlagContainer = document.getElementById("player-flag-container");
   const enemyFlagContainer = document.getElementById("enemy-flag-container");
   const playerSelectedFlagText = document.getElementById(
-    "playerSelectedFlagText"
+    "playerSelectedFlagText",
   );
   const enemySelectedFlagText = document.getElementById(
-    "enemySelectedFlagText"
+    "enemySelectedFlagText",
   );
   const continueGameButton = document.getElementById("continue-game-button");
   const countrySelectionMessage = document.getElementById(
-    "country-selection-message"
+    "country-selection-message",
   );
 
   const playerBoardElement = document.getElementById("player-board");
@@ -27,95 +26,73 @@ document.addEventListener("DOMContentLoaded", () => {
   const startGameButton = document.getElementById("start-game-button");
   const messageDisplay = document.getElementById("message");
 
-  const playerFlagImg = document.getElementById("player-flag");
-  const computerFlagImg = document.getElementById("computer-flag");
   const playerTitle = document.getElementById("player-title");
   const computerTitle = document.getElementById("computer-title");
 
-  // --- Game Variables ---
-  /* Hier leg ik uit de regels van game en hoe kun je spelen. */
+  const music = document.getElementById("bg-music");
+  const musicToggleButton = document.getElementById("music-toggle-button");
+  music.volume = 0.3;
+// Haal HTML-elementen op met hun ID en sla ze op in variabelen
+// Selecteer alle belangrijke HTML-elementen via hun ID,
+// zodat we ze later met JavaScript kunnen gebruiken (bijv. knoppen, schermen, tekst, muziek)
 
+
+ /*######## Constants and game status ############### */
   const boardRows = 10;
   const boardCols = 10;
   const boardSize = boardRows * boardCols;
-
+// 10x10 speelbord (klassiek Zeeslag)
   let playerShips = [];
   let computerShips = [];
+//De schepen van de speler en de schepen van de computer //
+// In deze arrays worden de posities van de schepen bijgehouden
 
-  const shipLengths = [5, 4, 4, 3, 3];
-  let currentShipIndex = 0;
-  let isHorizontal = true;
-  let gameStarted = false;
-  let playerTurn = true;
+  const shipLengths = [5, 4, 4, 3, 3]; //De lengtes van de schepen in het spel
+  let currentShipIndex = 0; //Welk schip wordt er momenteel geplaatst
+  let isHorizontal = true;  //is het horizontaal of verticaal
+  let gameStarted = false; //is het spel begonnen
+  let playerTurn = true; //wie is er aan de beurt
 
-  let botHitLastTurn = false;
-  let botLastHitCell = -1;
-  let botPossibleTargets = [];
+  let botHitLastTurn = false; //was het laatste schot raak?
+  let botPossibleTargets = []; //de volgende mogelijke doelen
+//Hierdoor speelt de bot niet willekeurig, maar logischer.
 
-  // --- Country Data  ---
-  /* Hier worden de landen gekozen. */
+ /*######## Country selection system ############### */
   const countries = [
     { id: "us", name: "USA", flag: "usaflag.png" },
     { id: "russia", name: "Russia", flag: "russiaflag.png" },
     { id: "china", name: "China", flag: "chinaflag.png" },
     { id: "uk", name: "UK", flag: "ukflag.png" },
-    {
-      id: "france",
-      name: "France",
-      flag: "franceflag.png",
-    },
-    {
-      id: "japan",
-      name: "Japan",
-      flag: "japanflag.png",
-    },
+    { id: "france", name: "France", flag: "franceflag.png" },
+    { id: "japan", name: "Japan", flag: "japanflag.png" },
     { id: "southkorea", name: "South Korea", flag: "southkoreaflag.png" },
     { id: "northkorea", name: "North Korea", flag: "northkoreaflag.png" },
-    {
-      id: "netherlands",
-      name: "Netherlands",
-      flag: "netherlandsflag.png",
-    },
-    { id: "turkey", name: "Turkey", flag: "turkeyflag.png " },
+    { id: "netherlands", name: "Netherlands", flag: "netherlandsflag.png" },
+    { id: "turkey", name: "Turkey", flag: "turkeyflag.png" },
   ];
 
   let selectedPlayerCountry = null;
   let selectedEnemyCountry = null;
+  //“Hier slaan we alle landen op in een array.
+//De speler en de computer kunnen later één van deze landen kiezen.”
 
-  // --- Utility Functions ---
-  /* Hier laat ik de schermen zien
-  Deze functie wordt gebruikt om tussen verschillende spelschermen te schakelen. */
+
+ /*######## ShowScreen()############### */
   function showScreen(screenToShow) {
     document.querySelectorAll(".screen").forEach((screen) => {
       screen.classList.remove("active");
       screen.classList.add("hidden");
     });
+
     screenToShow.classList.remove("hidden");
     screenToShow.classList.add("active");
   }
+// Verberg alle schermen en toon alleen het gekozen scherm
 
-  // --- Intro Screen Logic ---
-  /* Hier laat ik de intro scherm logica zien
-   Je mag niet zelfde landen kiezen */
-  introStartButton.addEventListener("click", () => {
-    showScreen(countrySelectionScreen);
-    // Render flags only when entering the country selection screen for the first time
-    // or if not already rendered, to avoid re-rendering on every return.
-    if (playerFlagContainer.children.length === 0) {
-      // Check if flags are already rendered
-      renderFlags(playerFlagContainer, "player");
-    }
-    if (enemyFlagContainer.children.length === 0) {
-      renderFlags(enemyFlagContainer, "enemy");
-    }
-    checkCountrySelectionsReady(); // Ensure initial message and button state are correct
-  });
-
-  // --- Country Selection Logic ---
-  /* Deze functie toont alle vlaggen in de opgegeven container
-  selectionType is "player" of "enemy" (wie kiest de vlag?) */
+ /*######## RenderFlags()############### */
   function renderFlags(containerElement, selectionType) {
     containerElement.innerHTML = "";
+
     countries.forEach((country) => {
       const flagDiv = document.createElement("div");
       flagDiv.classList.add("flag");
@@ -133,7 +110,10 @@ document.addEventListener("DOMContentLoaded", () => {
       });
     });
   }
+// Maak en toon alle vlaggen in de container en voeg klik-events toe
+//“Deze functie toont alle landen als vlaggen op het scherm en maakt het mogelijk om een land te kiezen door erop te klikken.”
 
+ /*######## SelectFlag() ############### */
   function selectFlag(country, selectionType) {
     let currentSelection;
     let selectionTextElement;
@@ -153,7 +133,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (currentSelection) {
       const prevSelectedFlag = containerElement.querySelector(
-        `.flag[data-country-id="${currentSelection.id}"]`
+        `.flag[data-country-id="${currentSelection.id}"]`,
       );
       if (prevSelectedFlag) {
         prevSelectedFlag.classList.remove("selected");
@@ -161,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     const newSelectedFlag = containerElement.querySelector(
-      `.flag[data-country-id="${country.id}"]`
+      `.flag[data-country-id="${country.id}"]`,
     );
     if (newSelectedFlag) {
       newSelectedFlag.classList.add("selected");
@@ -171,6 +151,7 @@ document.addEventListener("DOMContentLoaded", () => {
     checkCountrySelectionsReady();
   }
 
+ /*######## Check CountrySelections Ready() ############### */
   function checkCountrySelectionsReady() {
     if (selectedPlayerCountry && selectedEnemyCountry) {
       if (selectedPlayerCountry.id === selectedEnemyCountry.id) {
@@ -188,32 +169,10 @@ document.addEventListener("DOMContentLoaded", () => {
       continueGameButton.disabled = true;
     }
   }
-
-  continueGameButton.addEventListener("click", () => {
-    if (
-      selectedPlayerCountry &&
-      selectedEnemyCountry &&
-      selectedPlayerCountry.id !== selectedEnemyCountry.id
-    ) {
-      playerFlagImg.src = selectedPlayerCountry.flag;
-      playerFlagImg.alt = `${selectedPlayerCountry.name} Flag`;
-      // Update the innerHTML of playerTitle to include the flag icon
-      playerTitle.innerHTML = `Your Board <img src="${selectedPlayerCountry.flag}" alt="${selectedPlayerCountry.name} Flag" class="flag-icon">`;
-
-      computerFlagImg.src = selectedEnemyCountry.flag;
-      computerFlagImg.alt = `${selectedEnemyCountry.name} Flag`;
-      // Update the innerHTML of computerTitle to include the flag icon
-      computerTitle.innerHTML = `Opponent's Board <img src="${selectedEnemyCountry.flag}" alt="${selectedEnemyCountry.name} Flag" class="flag-icon">`;
-
-      showScreen(gameScreen);
-      initializeGame();
-    }
-  });
-
-  // --- Game Initialization ---
-  /* Game Start */
+ /*######## CreateBoard() Functie ############### */
   function createBoard(boardElement, isPlayerBoard) {
     boardElement.innerHTML = "";
+
     for (let i = 0; i < boardSize; i++) {
       const cell = document.createElement("div");
       cell.classList.add("cell");
@@ -226,10 +185,13 @@ document.addEventListener("DOMContentLoaded", () => {
         cell.addEventListener("mouseout", clearPlayerShipPreview);
         cell.addEventListener("click", placePlayerShip);
       }
+
       boardElement.appendChild(cell);
     }
   }
-  // --- Player Ship Placement Logic ---
+  // Maakt het speelbord aan met cellen en voegt interacties toe voor de speler
+
+   /*######## createBoard() Functie ############### */
   function handlePlayerShipPreview(e) {
     if (gameStarted || currentShipIndex >= shipLengths.length) return;
 
@@ -247,13 +209,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     for (let i = 0; i < currentShipLength; i++) {
       let cellId;
-      let targetRow, targetCol;
+      let targetRow;
+      let targetCol;
 
       if (isHorizontal) {
         cellId = startId + i;
         targetRow = currentRow;
         targetCol = currentCol + i;
-        if (targetCol >= boardCols || targetRow !== currentRow) {
+
+        if (targetCol >= boardCols) {
           isValidPlacement = false;
           break;
         }
@@ -261,7 +225,8 @@ document.addEventListener("DOMContentLoaded", () => {
         cellId = startId + i * boardCols;
         targetRow = currentRow + i;
         targetCol = currentCol;
-        if (targetRow >= boardRows || targetCol !== currentCol) {
+
+        if (targetRow >= boardRows) {
           isValidPlacement = false;
           break;
         }
@@ -280,17 +245,59 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (isValidPlacement) {
       cellsToHighlight.forEach((cell) =>
-        cell.classList.add("ship-placement-active")
+        cell.classList.add("ship-placement-active"),
       );
     } else {
       e.target.classList.add("invalid-placement");
     }
   }
-  //
+
+   /*######## Ship preview system ############### */
   function clearPlayerShipPreview() {
     playerBoardElement.querySelectorAll(".cell").forEach((cell) => {
       cell.classList.remove("ship-placement-active", "invalid-placement");
     });
+  }
+
+  // Bewaar de oorspronkelijke vakjes voor de tekening, ook na treffers.
+  function rememberShip(cells) {
+    cells.positions = [...cells];
+    return cells;
+  }
+
+  function drawShip(board, ship) {
+    const positions = ship.positions;
+    const firstCell = board.children[positions[0]];
+    if (firstCell.querySelector(".ship-model")) return;
+    const vertical = positions[1] - positions[0] === boardCols;
+    const model = document.createElement("span");
+    model.className = `ship-model${vertical ? " ship-vertical" : ""}`;
+    model.style.setProperty("--ship-length", positions.length);
+    model.setAttribute("aria-hidden", "true");
+    // Een eenvoudige bovenaanzicht-tekening: boeg, dek, brug en kanonnen.
+    model.innerHTML = `<svg viewBox="0 0 180 34" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <path class="ship-hull" d="M7 5 L137 5 Q161 5 177 17 Q161 29 137 29 L7 29 Q2 17 7 5Z"/>
+      <path class="ship-deck" d="M17 10 H134 L157 17 L134 24 H17Z"/>
+      <path class="ship-detail" d="M30 9V25 M122 9V25"/>
+      <rect class="ship-bridge" x="63" y="9" width="43" height="16" rx="3"/>
+      <rect class="ship-window" x="88" y="11" width="14" height="12" rx="2"/>
+      <circle class="ship-turret" cx="42" cy="17" r="6"/>
+      <path class="ship-barrel" d="M42 17H24"/>
+      <circle class="ship-turret" cx="129" cy="17" r="6"/>
+      <path class="ship-barrel" d="M129 17H149"/>
+    </svg><span class="sunk-label">SUNK</span>`;
+    firstCell.appendChild(model);
+  }
+
+  function showSunkShip(board, ship) {
+    drawShip(board, ship);
+    ship.positions.forEach((id) => {
+      const cell = board.children[id];
+      cell.classList.add("sunk");
+      cell.title = "Sunken ship";
+    });
+    board.children[ship.positions[0]].querySelector(".ship-model")
+      .classList.add("ship-sinking");
   }
 
   function placePlayerShip(e) {
@@ -306,13 +313,15 @@ document.addEventListener("DOMContentLoaded", () => {
 
     for (let i = 0; i < currentShipLength; i++) {
       let cellId;
-      let targetRow, targetCol;
+      let targetRow;
+      let targetCol;
 
       if (isHorizontal) {
         cellId = startId + i;
         targetRow = currentRow;
         targetCol = currentCol + i;
-        if (targetCol >= boardCols || targetRow !== currentRow) {
+
+        if (targetCol >= boardCols) {
           isValidPlacement = false;
           break;
         }
@@ -320,7 +329,8 @@ document.addEventListener("DOMContentLoaded", () => {
         cellId = startId + i * boardCols;
         targetRow = currentRow + i;
         targetCol = currentCol;
-        if (targetRow >= boardRows || targetCol !== currentCol) {
+
+        if (targetRow >= boardRows) {
           isValidPlacement = false;
           break;
         }
@@ -341,10 +351,13 @@ document.addEventListener("DOMContentLoaded", () => {
       newShipCells.forEach((id) => {
         playerBoardElement.children[id].classList.add(
           "occupied",
-          "player-ship"
+          "player-ship",
         );
       });
+
+      rememberShip(newShipCells);
       playerShips.push(newShipCells);
+      drawShip(playerBoardElement, newShipCells);
       currentShipIndex++;
       clearPlayerShipPreview();
 
@@ -352,7 +365,7 @@ document.addEventListener("DOMContentLoaded", () => {
         messageDisplay.textContent = `Place your ${shipLengths[currentShipIndex]} length ship.`;
       } else {
         messageDisplay.textContent =
-          'All your ships are placed. Click "Start Game" to begin!';
+          'All your ships are placed. Click "Start Battle" to begin!';
         startGameButton.disabled = false;
         rotateButton.disabled = true;
       }
@@ -362,96 +375,65 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  rotateButton.addEventListener("click", () => {
-    if (gameStarted || currentShipIndex >= shipLengths.length) return;
-    isHorizontal = !isHorizontal;
-    messageDisplay.textContent = `Ship orientation: ${
-      isHorizontal ? "Horizontal" : "Vertical"
-    }.`;
-  });
 
+   /*######## PlaceComputerShips() ############### */
   function placeComputerShips() {
-    computerShips.length = 0;
-    const allCells = [];
-    for (let i = 0; i < boardSize; i++) {
-      allCells.push(i);
-    }
+    computerShips = [];
 
     for (const length of shipLengths) {
       let placed = false;
+
       while (!placed) {
-        const isHorizontal = Math.random() < 0.5;
-        let startPos;
+        const randomHorizontal = Math.random() < 0.5;
+        const startPos = Math.floor(Math.random() * boardSize);
         let validPlacement = true;
-
-        if (isHorizontal) {
-          startPos = Math.floor(Math.random() * boardSize);
-          const startCol = startPos % boardCols;
-          if (startCol + length > boardCols) {
-            validPlacement = false;
-          }
-        } else {
-          startPos = Math.floor(Math.random() * boardSize);
-          const startRow = Math.floor(startPos / boardCols);
-          if (startRow + length > boardRows) {
-            validPlacement = false;
-          }
-        }
-
         const newShipCells = [];
-        if (validPlacement) {
-          for (let i = 0; i < length; i++) {
-            const cellId = isHorizontal
-              ? startPos + i
-              : startPos + i * boardCols;
-            if (
-              computerShips.flat().includes(cellId) ||
-              cellId < 0 ||
-              cellId >= boardSize ||
-              (isHorizontal &&
-                Math.floor(cellId / boardCols) !==
-                  Math.floor(startPos / boardCols))
-            ) {
-              validPlacement = false;
-              break;
-            }
-            newShipCells.push(cellId);
+
+        for (let i = 0; i < length; i++) {
+          const cellId = randomHorizontal
+            ? startPos + i
+            : startPos + i * boardCols;
+
+          const row = Math.floor(cellId / boardCols);
+          const startRow = Math.floor(startPos / boardCols);
+          const col = cellId % boardCols;
+          const startCol = startPos % boardCols;
+
+          if (
+            cellId >= boardSize ||
+            (randomHorizontal && row !== startRow) ||
+            (!randomHorizontal && col !== startCol) ||
+            computerShips.flat().includes(cellId)
+          ) {
+            validPlacement = false;
+            break;
           }
+
+          newShipCells.push(cellId);
         }
 
         if (validPlacement) {
-          computerShips.push(newShipCells);
+          computerShips.push(rememberShip(newShipCells));
           placed = true;
         }
       }
     }
   }
 
-  startGameButton.addEventListener("click", () => {
-    if (currentShipIndex < shipLengths.length) {
-      messageDisplay.textContent =
-        "Please place all your ships before starting the game!";
-      return;
-    }
-    gameStarted = true;
-    startGameButton.disabled = true;
+   /*######## checkWin() ############### */
+  function checkWin(shipsArray) {
+    return shipsArray.every((ship) => ship.length === 0);
+  }
 
-    playerBoardElement.querySelectorAll(".cell").forEach((cell) => {
-      cell.removeEventListener("mouseover", handlePlayerShipPreview);
-      cell.removeEventListener("mouseout", clearPlayerShipPreview);
-      cell.removeEventListener("click", placePlayerShip);
-    });
 
-    messageDisplay.textContent =
-      "Game started! Click on the opponent's board to fire.";
-  });
-
-  computerBoardElement.addEventListener("click", handlePlayerShot);
+   /*######## HandlePlayerShot()############### */
 
   function handlePlayerShot(e) {
     if (!gameStarted || !playerTurn) return;
 
     const cell = e.target;
+    if (!cell.classList.contains("cell")) return;
+
     const cellId = parseInt(cell.dataset.id);
 
     if (cell.classList.contains("hit") || cell.classList.contains("miss")) {
@@ -461,12 +443,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let isHit = false;
     let shipSunk = false;
+
     computerShips.forEach((ship) => {
       if (ship.includes(cellId)) {
         isHit = true;
         ship.splice(ship.indexOf(cellId), 1);
         if (ship.length === 0) {
           shipSunk = true;
+          showSunkShip(computerBoardElement, ship);
         }
       }
     });
@@ -485,15 +469,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (checkWin(computerShips)) {
       messageDisplay.textContent = "Congratulations! You won the game!";
       gameStarted = false;
-      computerBoardElement.removeEventListener("click", handlePlayerShot);
       return;
     }
 
     playerTurn = false;
     messageDisplay.textContent += " Opponent's turn...";
-    setTimeout(computerTurn, 1500);
+    setTimeout(computerTurn, 1200);
   }
 
+   /*######## Computer Turn ############### */
   function computerTurn() {
     if (!gameStarted) return;
 
@@ -502,6 +486,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (botHitLastTurn && botPossibleTargets.length > 0) {
       targetCellId = botPossibleTargets.shift();
+
       const targetCell = playerBoardElement.children[targetCellId];
       if (
         targetCell.classList.contains("hit") ||
@@ -520,9 +505,9 @@ document.addEventListener("DOMContentLoaded", () => {
           availableCells.push(i);
         }
       }
-      if (availableCells.length === 0) {
-        return;
-      }
+
+      if (availableCells.length === 0) return;
+
       targetCellId =
         availableCells[Math.floor(Math.random() * availableCells.length)];
       botHitLastTurn = false;
@@ -539,6 +524,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ship.splice(ship.indexOf(targetCellId), 1);
         if (ship.length === 0) {
           shipSunk = true;
+          showSunkShip(playerBoardElement, ship);
         }
       }
     });
@@ -547,7 +533,6 @@ document.addEventListener("DOMContentLoaded", () => {
       cell.classList.add("hit");
       messageDisplay.textContent = "Opponent hit your ship!";
       botHitLastTurn = true;
-      botLastHitCell = targetCellId;
 
       if (shipSunk) {
         messageDisplay.textContent += ` Opponent sank your ${selectedPlayerCountry.name} ship!`;
@@ -558,17 +543,19 @@ document.addEventListener("DOMContentLoaded", () => {
         const hitCol = targetCellId % boardCols;
 
         const potentialTargets = [
-          [hitRow - 1, hitCol], // Up
-          [hitRow + 1, hitCol], // Down
-          [hitRow, hitCol - 1], // Left
-          [hitRow, hitCol + 1], // Right
+          [hitRow - 1, hitCol],
+          [hitRow + 1, hitCol],
+          [hitRow, hitCol - 1],
+          [hitRow, hitCol + 1],
         ];
 
         botPossibleTargets = [];
+
         potentialTargets.forEach(([r, c]) => {
           if (r >= 0 && r < boardRows && c >= 0 && c < boardCols) {
             const id = r * boardCols + c;
             const targetCell = playerBoardElement.children[id];
+
             if (
               targetCell &&
               !targetCell.classList.contains("hit") &&
@@ -596,10 +583,7 @@ document.addEventListener("DOMContentLoaded", () => {
     messageDisplay.textContent += " Your turn!";
   }
 
-  function checkWin(shipsArray) {
-    return shipsArray.every((ship) => ship.length === 0);
-  }
-
+   /*######## initializeGame() ############### */
   function initializeGame() {
     playerShips = [];
     computerShips = [];
@@ -608,7 +592,6 @@ document.addEventListener("DOMContentLoaded", () => {
     gameStarted = false;
     playerTurn = true;
     botHitLastTurn = false;
-    botLastHitCell = -1;
     botPossibleTargets = [];
 
     createBoard(playerBoardElement, true);
@@ -620,58 +603,82 @@ document.addEventListener("DOMContentLoaded", () => {
     rotateButton.disabled = false;
   }
 
-  // --- Initial Load ---
-  // Only show the intro screen initially
+  introStartButton.addEventListener("click", () => {
+    music.play().catch((error) => {
+      console.log("Music could not start:", error);
+    });
+
+    showScreen(countrySelectionScreen);
+
+    if (playerFlagContainer.children.length === 0) {
+      renderFlags(playerFlagContainer, "player");
+    }
+
+    if (enemyFlagContainer.children.length === 0) {
+      renderFlags(enemyFlagContainer, "enemy");
+    }
+
+    checkCountrySelectionsReady();
+  });
+
+  continueGameButton.addEventListener("click", () => {
+    if (
+      selectedPlayerCountry &&
+      selectedEnemyCountry &&
+      selectedPlayerCountry.id !== selectedEnemyCountry.id
+    ) {
+      playerTitle.innerHTML = `Your Board <img src="${selectedPlayerCountry.flag}" alt="${selectedPlayerCountry.name} Flag" class="flag-icon">`;
+      computerTitle.innerHTML = `Opponent's Board <img src="${selectedEnemyCountry.flag}" alt="${selectedEnemyCountry.name} Flag" class="flag-icon">`;
+
+      showScreen(gameScreen);
+      initializeGame();
+    }
+  });
+
+
+   /*######## Event Listener ############### */
+  rotateButton.addEventListener("click", () => {
+    if (gameStarted || currentShipIndex >= shipLengths.length) return;
+
+    isHorizontal = !isHorizontal;
+    messageDisplay.textContent = `Ship orientation: ${
+      isHorizontal ? "Horizontal" : "Vertical"
+    }.`;
+  });
+
+  startGameButton.addEventListener("click", () => {
+    if (currentShipIndex < shipLengths.length) {
+      messageDisplay.textContent =
+        "Please place all your ships before starting the game!";
+      return;
+    }
+
+    gameStarted = true;
+    startGameButton.disabled = true;
+
+    playerBoardElement.querySelectorAll(".cell").forEach((cell) => {
+      cell.removeEventListener("mouseover", handlePlayerShipPreview);
+      cell.removeEventListener("mouseout", clearPlayerShipPreview);
+      cell.removeEventListener("click", placePlayerShip);
+    });
+
+    messageDisplay.textContent =
+      "Game started! Click on the opponent's board to fire.";
+  });
+
+   /*######## Music System ############### */
+  computerBoardElement.addEventListener("click", handlePlayerShot);
+  musicToggleButton.addEventListener("click", () => {
+    if (music.paused) {
+      music.play().catch((error) => {
+        console.log("Music could not resume:", error);
+      });
+      musicToggleButton.textContent = "Pause Music";
+    } else {
+      music.pause();
+      musicToggleButton.textContent = "Play Music";
+    }
+  });
+
   showScreen(introScreen);
 });
-
-/*
-1. DOM Element References (Constants): Lines 2 - 34
-   * JavaScript references are created here to reach important HTML elements by their ID.
-
-2. Game Variables: Lines 35 - 54
-   * Variables that manage the game rules and its current state are defined here.
-
-3. Country Data: Lines 55 - 84
-   * Information about the countries that can be chosen in the game is stored here.
-
-4. Utility Functions (showScreen): Lines 85 - 96
-   * This function is used to switch between different game screens.
-
-5. Intro Screen Logic: Lines 97 - 113
-   * Manages the click event of the "Start" button on the intro screen and the transition to country selection.
-
-6. Country Selection Logic: Lines 114 - 212
-   * **renderFlags**: Dynamically displays all flags in the specified container.
-   * **selectFlag**: Updates the selected flag and provides visual feedback.
-   * **checkCountrySelectionsReady**: Checks the validity of country selections and adjusts the message/continue button.
-   * **continueGameButton Event Listener**: Ensures the transition to the game screen after country selection and updates the flags.
-
-7. Game Initialization and Board Creation (createBoard): Lines 213 - 231
-   * Dynamically creates the game boards for both the player and the computer.
-
-8. Player Ship Placement Logic: Lines 232 - 351
-   * **handlePlayerShipPreview**: Provides a preview and checks the validity of ship placement.
-   * **clearPlayerShipPreview**: Clears ship preview highlights.
-   * **placePlayerShip**: Places the ship on the player's board, checks for overlaps, and proceeds to the next ship.
-   * **rotateButton Event Listener**: Changes the orientation of the ship (horizontal/vertical).
-
-9. Computer Ship Placement Logic (placeComputerShips): Lines 354 - 400
-   * Randomly places the computer's ships in valid positions.
-
-10. Game Start Logic (startGameButton Event Listener): Lines 403 - 419
-    * Starts the game once all ships are placed and removes the ship placement event listeners.
-
-11. Shooting Logic: Lines 422 - 558
-    * **handlePlayerShot**: Processes the player's shot on the computer board, determines hit/miss, and switches turns.
-    * **computerTurn**: Processes the computer's shot on the player's board (includes basic AI logic and target tracking).
-
-12. Win Condition Check (checkWin): Lines 561 - 564
-    * Checks if all ships of a given side have been sunk.
-
-13. Game Reset and Start (initializeGame): Lines 567 - 588
-    * Resets game variables, rebuilds the boards, and starts a new game.
-
-14. Initial Load: Lines 591 - 592
-    * Shows the intro screen by default when the page first loads.
-*/
