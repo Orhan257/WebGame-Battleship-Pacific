@@ -86,6 +86,7 @@ document.addEventListener("DOMContentLoaded", () => { // Voer de JavaScript-code
 
     screenToShow.classList.remove("hidden");
     screenToShow.classList.add("active");
+    window.scrollTo(0, 0);
   }
 // Verberg alle schermen en toon alleen het gekozen scherm
 
@@ -94,7 +95,10 @@ document.addEventListener("DOMContentLoaded", () => { // Voer de JavaScript-code
     containerElement.innerHTML = "";
 
     countries.forEach((country) => {
-      const flagDiv = document.createElement("div");
+      const flagDiv = document.createElement("button");
+      flagDiv.type = "button";
+      flagDiv.setAttribute("aria-pressed", "false");
+      flagDiv.setAttribute("aria-label", country.name);
       flagDiv.classList.add("flag");
       flagDiv.dataset.countryId = country.id;
 
@@ -103,6 +107,15 @@ document.addEventListener("DOMContentLoaded", () => { // Voer de JavaScript-code
       img.alt = `${country.name} Flag`;
 
       flagDiv.appendChild(img);
+      const label = document.createElement("span");
+      label.className = "country-name";
+      label.textContent = country.name;
+      flagDiv.appendChild(label);
+      const selectedMark = document.createElement("span");
+      selectedMark.className = "selected-mark";
+      selectedMark.setAttribute("aria-hidden", "true");
+      selectedMark.textContent = "✓";
+      flagDiv.appendChild(selectedMark);
       containerElement.appendChild(flagDiv);
 
       flagDiv.addEventListener("click", () => {
@@ -137,6 +150,7 @@ document.addEventListener("DOMContentLoaded", () => { // Voer de JavaScript-code
       );
       if (prevSelectedFlag) {
         prevSelectedFlag.classList.remove("selected");
+        prevSelectedFlag.setAttribute("aria-pressed", "false");
       }
     }
 
@@ -145,6 +159,7 @@ document.addEventListener("DOMContentLoaded", () => { // Voer de JavaScript-code
     );
     if (newSelectedFlag) {
       newSelectedFlag.classList.add("selected");
+      newSelectedFlag.setAttribute("aria-pressed", "true");
     }
 
     selectionTextElement.textContent = `Selected Flag: ${country.name}`;
@@ -289,11 +304,26 @@ document.addEventListener("DOMContentLoaded", () => { // Voer de JavaScript-code
     firstCell.appendChild(model);
   }
 
+  // Alleen visuele effecten; de beurt en de trefregels blijven hetzelfde.
+  function playShotEffect(cell, kind) {
+    const effect = document.createElement("span");
+    effect.className = `shot-effect ${kind}-effect`;
+    effect.setAttribute("aria-hidden", "true");
+    for (let i = 0; i < 8; i++) {
+      const spark = document.createElement("i");
+      spark.style.setProperty("--angle", `${i * 45}deg`);
+      effect.appendChild(spark);
+    }
+    cell.appendChild(effect);
+    setTimeout(() => effect.remove(), 1500);
+  }
+
   function showSunkShip(board, ship) {
     drawShip(board, ship);
     ship.positions.forEach((id) => {
       const cell = board.children[id];
       cell.classList.add("sunk");
+      playShotEffect(cell, "sink");
       cell.title = "Sunken ship";
     });
     board.children[ship.positions[0]].querySelector(".ship-model")
@@ -457,12 +487,14 @@ document.addEventListener("DOMContentLoaded", () => { // Voer de JavaScript-code
 
     if (isHit) {
       cell.classList.add("hit");
+      playShotEffect(cell, "hit");
       messageDisplay.textContent = "It's a hit!";
       if (shipSunk) {
         messageDisplay.textContent += ` You sank a ${selectedEnemyCountry.name} ship!`;
       }
     } else {
       cell.classList.add("miss");
+      playShotEffect(cell, "miss");
       messageDisplay.textContent = "You missed!";
     }
 
@@ -531,6 +563,7 @@ document.addEventListener("DOMContentLoaded", () => { // Voer de JavaScript-code
 
     if (isHit) {
       cell.classList.add("hit");
+      playShotEffect(cell, "hit");
       messageDisplay.textContent = "Opponent hit your ship!";
       botHitLastTurn = true;
 
@@ -568,6 +601,7 @@ document.addEventListener("DOMContentLoaded", () => { // Voer de JavaScript-code
       }
     } else {
       cell.classList.add("miss");
+      playShotEffect(cell, "miss");
       messageDisplay.textContent = "Opponent missed!";
       botHitLastTurn = false;
       botPossibleTargets = [];

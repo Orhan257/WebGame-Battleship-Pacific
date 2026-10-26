@@ -16,26 +16,38 @@
 
     <!-- Country Selection Screen -->
     <div id="country-selection-screen" class="screen hidden">
-      <h1 class="title">YOU</h1>
-      <p class="subtitle">Choose your country!</p>
-      <div id="player-flag-container" class="flag-container"></div>
-      <p id="playerSelectedFlagText" class="selection-status">
-        Selected Flag: None
-      </p>
-
-      <h1 class="title">ENEMY</h1>
-      <p class="subtitle">Choose enemy country!</p>
-      <div id="enemy-flag-container" class="flag-container"></div>
-      <p id="enemySelectedFlagText" class="selection-status">
-        Selected Flag: None
-      </p>
-
-      <button id="continue-game-button" disabled>Continue to Game</button>
-      <p id="country-selection-message" class="message-area"></p>
+      <header class="selection-header">
+        <p class="eyebrow">BATTLESHIP / PACIFIC</p>
+        <h1>Choose your fleet<span>.</span></h1>
+        <p>Two sides. One ocean. Make your choice.</p>
+      </header>
+      <div class="fleet-selection">
+        <section class="fleet-panel player-panel" aria-labelledby="your-fleet-heading">
+          <div class="panel-heading"><span class="step-number">01</span><div>
+            <p class="eyebrow">YOUR SIDE</p><h2 id="your-fleet-heading">Your fleet</h2>
+          </div><span class="fleet-tag">PLAYER</span></div>
+          <div id="player-flag-container" class="flag-container"></div>
+          <p id="playerSelectedFlagText" class="selection-status" aria-live="polite">Selected Flag: None</p>
+        </section>
+        <div class="versus" aria-hidden="true">VS</div>
+        <section class="fleet-panel enemy-panel" aria-labelledby="enemy-fleet-heading">
+          <div class="panel-heading"><span class="step-number">02</span><div>
+            <p class="eyebrow">OPPOSING SIDE</p><h2 id="enemy-fleet-heading">Enemy fleet</h2>
+          </div><span class="fleet-tag">COMPUTER</span></div>
+          <div id="enemy-flag-container" class="flag-container"></div>
+          <p id="enemySelectedFlagText" class="selection-status" aria-live="polite">Selected Flag: None</p>
+        </section>
+      </div>
+      <footer class="selection-footer">
+        <p id="country-selection-message" class="message-area" aria-live="polite"></p>
+        <button id="continue-game-button" disabled>Continue to Game <span aria-hidden="true">→</span></button>
+      </footer>
     </div>
 
     <!-- Game Screen -->
     <div id="game-screen" class="screen hidden">
+      <header class="battle-header"><p class="eyebrow">BATTLESHIP / PACIFIC</p>
+      <h1>Battle stations<span>.</span></h1><p>Place your fleet. Read the ocean. Take your shot.</p></header>
       <div class="game-container">
         <div class="player-board-container">
           <h2 id="player-title">Your Board</h2>
@@ -54,14 +66,12 @@
       </div>
 
       <div class="message-area game-message-area">
-        <p id="message"></p>
+        <p id="message" role="status" aria-live="polite"></p>
       </div>
     </div>
 
     <!-- Background Music -->
-    <audio id="bg-music" loop>
-      <source src="glorious-morning.mp3" type="audio/mpeg" />
-    </audio>
+
 
     <audio id="bg-music" loop>
       <source src="glorious-morning.mp3" type="audio/mpeg" />
