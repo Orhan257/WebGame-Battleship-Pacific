@@ -70,6 +70,29 @@
       </div>
     </div>
 
+    <!-- Battle results -->
+    <section id="result-screen" class="screen hidden" aria-labelledby="result-title">
+      <div class="result-card">
+        <p class="eyebrow">BATTLESHIP / PACIFIC · BATTLE REPORT</p>
+        <div class="winner-flag-wrap"><img id="winner-flag" alt="" /></div>
+        <p id="winner-name" class="winner-name"></p>
+        <h1 id="result-title" tabindex="-1"></h1>
+        <p id="result-summary" class="result-summary"></p>
+        <p class="result-stats-label">YOUR PERFORMANCE</p>
+        <dl class="result-stats">
+          <div><dt>Total shots</dt><dd id="result-shots">0</dd></div>
+          <div><dt>Hits</dt><dd id="result-hits">0</dd></div>
+          <div><dt>Accuracy</dt><dd id="result-accuracy">0%</dd></div>
+          <div><dt>Ships sunk</dt><dd id="result-sunk">0 / 5</dd></div>
+        </dl>
+        <div class="result-actions">
+          <button id="play-again-button">Play again <span aria-hidden="true">↗</span></button>
+          <button id="change-countries-button">Change countries</button>
+        </div>
+        <p class="result-note">A new ocean. A new chance.</p>
+      </div>
+    </section>
+
     <!-- Background Music -->
 
 

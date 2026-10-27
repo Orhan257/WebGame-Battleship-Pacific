@@ -6,6 +6,9 @@ document.addEventListener("DOMContentLoaded", () => { // Voer de JavaScript-code
     "country-selection-screen",
   );
   const gameScreen = document.getElementById("game-screen");
+  const resultScreen = document.getElementById("result-screen");
+  const resultTitle = document.getElementById("result-title");
+  let resultTimer = null;
 
   const playerFlagContainer = document.getElementById("player-flag-container");
   const enemyFlagContainer = document.getElementById("enemy-flag-container");
@@ -451,6 +454,36 @@ document.addEventListener("DOMContentLoaded", () => { // Voer de JavaScript-code
   }
 
    /*######## checkWin() ############### */
+  function finishBattle(playerWon) {
+    gameStarted = false;
+    playerTurn = false;
+    const winner = playerWon ? selectedPlayerCountry : selectedEnemyCountry;
+    const hits = computerBoardElement.querySelectorAll(".cell.hit").length;
+    const misses = computerBoardElement.querySelectorAll(".cell.miss").length;
+    const shots = hits + misses;
+    const sunk = computerShips.filter((ship) => ship.length === 0).length;
+    resultScreen.classList.toggle("defeat", !playerWon);
+    const winnerFlag = document.getElementById("winner-flag");
+    winnerFlag.src = winner.flag;
+    winnerFlag.alt = `${winner.name} flag`;
+    document.getElementById("winner-name").textContent = `${winner.name} wins`;
+    resultTitle.textContent = playerWon ? "Victory!" : "Fleet lost.";
+    document.getElementById("result-summary").textContent = playerWon
+      ? "The enemy fleet has sunk. The Pacific is yours."
+      : "Your fleet fought to the end. Ready for a rematch?";
+    document.getElementById("result-shots").textContent = shots;
+    document.getElementById("result-hits").textContent = hits;
+    document.getElementById("result-accuracy").textContent = `${shots ? Math.round(hits / shots * 100) : 0}%`;
+    document.getElementById("result-sunk").textContent = `${sunk} / ${shipLengths.length}`;
+    // Laat eerst de laatste zinkanimatie zien.
+    clearTimeout(resultTimer);
+    resultTimer = setTimeout(() => {
+      showScreen(resultScreen);
+      resultTitle.focus({ preventScroll: true });
+      resultTimer = null;
+    }, 1500);
+  }
+
   function checkWin(shipsArray) {
     return shipsArray.every((ship) => ship.length === 0);
   }
@@ -500,7 +533,7 @@ document.addEventListener("DOMContentLoaded", () => { // Voer de JavaScript-code
 
     if (checkWin(computerShips)) {
       messageDisplay.textContent = "Congratulations! You won the game!";
-      gameStarted = false;
+      finishBattle(true);
       return;
     }
 
@@ -609,7 +642,7 @@ document.addEventListener("DOMContentLoaded", () => { // Voer de JavaScript-code
 
     if (checkWin(playerShips)) {
       messageDisplay.textContent = `You lost! ${selectedEnemyCountry.name} won the game!`;
-      gameStarted = false;
+      finishBattle(false);
       return;
     }
 
@@ -619,6 +652,8 @@ document.addEventListener("DOMContentLoaded", () => { // Voer de JavaScript-code
 
    /*######## initializeGame() ############### */
   function initializeGame() {
+    clearTimeout(resultTimer);
+    resultTimer = null;
     playerShips = [];
     computerShips = [];
     currentShipIndex = 0;
@@ -636,6 +671,18 @@ document.addEventListener("DOMContentLoaded", () => { // Voer de JavaScript-code
     startGameButton.disabled = true;
     rotateButton.disabled = false;
   }
+
+  document.getElementById("play-again-button").addEventListener("click", () => {
+    initializeGame();
+    showScreen(gameScreen);
+    rotateButton.focus({ preventScroll: true });
+  });
+
+  document.getElementById("change-countries-button").addEventListener("click", () => {
+    showScreen(countrySelectionScreen);
+    checkCountrySelectionsReady();
+    playerFlagContainer.querySelector(".flag").focus({ preventScroll: true });
+  });
 
   introStartButton.addEventListener("click", () => {
     music.play().catch((error) => {
